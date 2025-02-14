@@ -2,6 +2,10 @@ package auth
 
 import (
 	"context"
+	"errors"
+	"sso/internal/grpc/auth"
+	"sso/internal/services/auth"
+	"sso/internal/storage"
 
 	ssov1 "github.com/chas3air/protos/gen/go/sso"
 	"google.golang.org/grpc"
@@ -46,7 +50,9 @@ func (s *serverAPI) Login(ctx context.Context, in *ssov1.LoginRequest) (*ssov1.L
 
 	token, err := s.auth.Login(ctx, in.GetEmail(), in.GetPassword(), int(in.GetAppId()))
 	if err != nil {
-		// TODO:...
+		if errors.Is(err, auth.ErrInvalidCredentials) {
+			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
+		}
 		return nil, status.Error(codes.Internal, "failed to login")
 	}
 
@@ -65,7 +71,9 @@ func (s *serverAPI) Register(ctx context.Context, in *ssov1.RegisterRequest) (*s
 
 	uid, err := s.auth.Register(ctx, in.GetEmail(), in.GetPassword())
 	if err != nil {
-		// TODO:...
+		if errors.Is(err, storage.ErrUserExists) {
+			return nil, status.Error(codes.AlreadyExists, "user already exists")
+		}
 		return nil, status.Error(codes.Internal, "failed to register user")
 	}
 
@@ -81,7 +89,10 @@ func (s *serverAPI) IsAdmin(ctx context.Context, in *ssov1.IsAdminRequest) (*sso
 
 	isAdmin, err := s.auth.IsAdmin(ctx, in.GetUserId())
 	if err != nil {
-		// TODO:...
+		if errors.Is(err, storage.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
+
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
