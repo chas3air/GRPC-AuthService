@@ -118,12 +118,12 @@ func (a *Auth) Login(
 
 // RegisterNewUser registers new user in the system and returns user ID.
 // If user with given username already exists, returns error.
-func (a *Auth) RegisterNewUser(
+func (a *Auth) Register(
 	ctx context.Context,
 	email string,
 	password string,
 ) (int64, error) {
-	const op = "auth.RegisterNewUser"
+	const op = "auth.Register"
 	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", email),

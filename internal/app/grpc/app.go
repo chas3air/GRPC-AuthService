@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	authgrpc "sso/internal/grpc/auth"
 
 	"google.golang.org/grpc"
 )
@@ -14,8 +15,10 @@ type App struct {
 	port       int
 }
 
-func New(log *slog.Logger, port int) *App {
+func New(log *slog.Logger, authService authgrpc.Auth, port int) *App {
 	gRPCServer := grpc.NewServer()
+
+	authgrpc.Register(gRPCServer, authService)
 
 	return &App{
 		log:        log,
@@ -38,7 +41,7 @@ func (a *App) Run() error {
 		slog.Int("port", a.port),
 	)
 
-	l, err := net.Listen("tcp", fmt.Sprintf(":%s", a.port))
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}

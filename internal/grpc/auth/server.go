@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"sso/internal/grpc/auth"
 	"sso/internal/services/auth"
 	"sso/internal/storage"
 
@@ -33,7 +32,7 @@ type serverAPI struct {
 	auth Auth
 }
 
-func Redister(gRPC *grpc.Server, auth Auth) {
+func Register(gRPC *grpc.Server, auth Auth) {
 	ssov1.RegisterAuthServer(gRPC, &serverAPI{auth: auth})
 }
 
